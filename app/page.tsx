@@ -1,65 +1,197 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Header } from '@/components/layout/Header';
+import { TypingArea } from '@/components/typing/TypingArea';
+import { ResultsDisplay } from '@/components/typing/ResultsDisplay';
+import { Leaderboard } from '@/components/typing/Leaderboard';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useTypingTest } from '@/hooks/useTypingTest';
+import { useLeaderboard } from '@/hooks/useLeaderboard';
+import { useFullscreen } from '@/hooks/useFullscreen';
+import { TestSettings } from '@/types';
+import { DEFAULT_SETTINGS, STORAGE_KEYS } from '@/lib/constants';
+import { getNextStudentName } from '@/lib/statistics';
+import { Trophy } from 'lucide-react';
 
 export default function Home() {
+  const [settings, setSettings] = useState<TestSettings>(DEFAULT_SETTINGS);
+  const [settingsKey, setSettingsKey] = useState(0); // Force re-render on settings change
+  const [studentName, setStudentName] = useState('');
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const { leaderboard, addEntry } = useLeaderboard();
+  const { isFullscreen, toggleFullscreen } = useFullscreen();
+
+  const {
+    status,
+    words,
+    typedText,
+    wordStates,
+    stats,
+    timer,
+    elapsedTime,
+    handleInput,
+    restart,
+  } = useTypingTest(settings);
+
+  // Load settings from localStorage
+  const loadSettings = useCallback(() => {
+    const storedSettings = localStorage.getItem(STORAGE_KEYS.SETTINGS);
+    if (storedSettings) {
+      try {
+        const parsed = JSON.parse(storedSettings);
+        setSettings(parsed);
+        setSettingsKey(prev => prev + 1); // Force hook to reinitialize
+      } catch (error) {
+        console.error('Failed to load settings:', error);
+      }
+    }
+  }, []);
+
+  // Load settings on mount and listen for changes
+  useEffect(() => {
+    loadSettings();
+    
+    // Listen for storage events (from other tabs)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEYS.SETTINGS) loadSettings();
+    };
+    
+    // Listen for custom event (same tab)
+    const handleSettingsUpdate = () => loadSettings();
+    
+    // Listen for focus (when coming back from admin page)
+    const handleFocus = () => loadSettings();
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('settingsUpdated', handleSettingsUpdate);
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('settingsUpdated', handleSettingsUpdate);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [loadSettings]);
+
+  // Tab key to restart - Global keyboard listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        restart();
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [restart]);
+
+  // Save Results - generate student name only when saving
+  useEffect(() => {
+    if (status === 'finished' && stats.stormPoints > 0) {
+      const name = getNextStudentName();
+      setStudentName(name);
+      addEntry({
+        studentName: name,
+        stormPoints: stats.stormPoints,
+        wpm: stats.wpm,
+        accuracy: stats.accuracy,
+        timestamp: Date.now(),
+        difficulty: settings.difficulty,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className="min-h-screen bg-background text-foreground flex flex-col overflow-hidden selection:bg-primary/20">
+      <Header onFullscreen={toggleFullscreen} isFullscreen={isFullscreen} />
+
+      <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-8 relative">
+        <AnimatePresence mode="wait">
+          {status === 'finished' ? (
+            <motion.div
+              key="results"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full max-w-4xl"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              <ResultsDisplay
+                stats={stats}
+                difficulty={settings.difficulty}
+                duration={settings.mode === 'time' ? settings.duration : elapsedTime}
+                studentName={studentName}
+                onRestart={restart}
+                onViewLeaderboard={() => setShowLeaderboard(true)}
+              />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="typing"
+              className="w-full max-w-5xl flex flex-col items-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
             >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+              {/* Info / Header Stats */}
+
+              <div className="mb-12 flex gap-12 text-muted-foreground/50 font-mono text-lg select-none">
+                {status !== 'idle' && (
+                  <>
+                    {settings.mode === 'time' && (
+                      <div className={`transition-colors duration-300 ${status === 'running' ? 'text-primary' : ''}`}>
+                        {timer.timeRemaining}s
+                      </div>
+                    )}
+                    <div>{settings.difficulty}</div>
+                  </>
+                )}
+              </div>
+
+              <TypingArea
+                words={words}
+                typedText={typedText}
+                wordStates={wordStates}
+                status={status}
+                timer={timer}
+                onChange={handleInput}
+                className="mb-8"
+              />
+
+              <div className="mt-12 text-center text-sm text-muted-foreground">
+                <span className="bg-muted px-2 py-1 rounded">Tab</span> to restart
+              </div>
+
+              <motion.div
+                className="mt-8"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+              >
+                <Button variant="ghost" className="text-muted-foreground hover:text-primary" onClick={() => setShowLeaderboard(true)}>
+                  <Trophy className="w-4 h-4 mr-2" /> Leaderboard
+                </Button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
+
+      {/* Leaderboard Dialog */}
+      <Dialog open={showLeaderboard} onOpenChange={setShowLeaderboard}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto bg-card/95 backdrop-blur-xl border-white/10 shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl flex items-center gap-2 font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
+              <Trophy className="w-6 h-6 text-primary" />
+              Leaderboard
+            </DialogTitle>
+          </DialogHeader>
+          <Leaderboard entries={leaderboard} maxEntries={20} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

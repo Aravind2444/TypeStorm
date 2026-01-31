@@ -1,36 +1,92 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TypeStorm ⚡
 
-## Getting Started
+A modern, Monkeytype-inspired typing speed test web application built for the **Blue Screen Programming Club (BSPC)** at **Hindustan Institute of Technology and Science (HITS)**. Designed specifically for the **Career Compass 2026** event to showcase typing skills to visiting 11th-grade students.
 
-First, run the development server:
+## 🎯 Features
+
+### Core Functionality
+
+- **Typing Test Modes:**
+  - ⏱️ Time-based (default: 60 seconds)
+  - 📝 Word-count based (customizable)
+- **Difficulty Levels:**
+  - 🟢 Easy - Basic HITS-related terms
+  - 🟡 Medium - HITS achievements and departments
+  - 🔴 Hard - Complex phrases and technical terms
+
+- **Storm Points Scoring:**
+  - Unique scoring system: `WPM × (Accuracy / 100)`
+  - Rewards both speed AND accuracy
+  - Prevents careless high-speed typing
+
+- **Real-time Statistics:**
+  - Words Per Minute (WPM)
+  - Accuracy percentage
+  - Error count
+  - Storm Points
+
+### Advanced Features
+
+- 🏆 **Leaderboard System** with localStorage
+- 👥 **Auto-numbered Students** (student1, student2, etc.)
+- 🎨 **Dark/Light Theme Toggle**
+- 💎 **Glassmorphism UI** with backdrop blur effects
+- 🖥️ **Fullscreen Mode** for kiosk display
+- 🔐 **Admin Panel** with password protection
+- 📊 **Comprehensive Results Screen**
+- 🎯 **HITS-themed Word Lists** promoting college achievements
+
+## 🚀 Quick Start
 
 ```bash
+# Install dependencies
+npm install
+
+# Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Open http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🎮 Usage Guide
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### For Students
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Start typing in the input field - test begins automatically
+2. Complete the test (time/word-based)
+3. View your Storm Points, WPM, and Accuracy
+4. Click "Try Again" for another attempt
 
-## Learn More
+### For Admins
 
-To learn more about Next.js, take a look at the following resources:
+1. Navigate to `/admin` or click ⚙️ Settings
+2. Login with password: `bspc2026`
+3. Configure test settings (mode, duration, difficulty)
+4. Reset leaderboard between classes
+5. Use fullscreen mode for kiosk display
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🛠️ Tech Stack
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Next.js 16.1.6 (App Router)
+- React 19.2.3
+- Tailwind CSS v4
+- ShadcnUI Components
+- TypeScript
+- next-themes
 
-## Deploy on Vercel
+## 📝 Default Settings
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Admin Password:** `bspc2026`
+- **Test Mode:** Time-based
+- **Duration:** 60 seconds
+- **Difficulty:** Medium
+- **Theme:** Dark mode
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🎓 About
+
+**Event:** Career Compass 2026  
+**Department:** Computer Science & Engineering  
+**College:** Hindustan Institute of Technology and Science  
+**Club:** Blue Screen Programming Club (BSPC)
+
+Made with ❤️ and ⌨️ by BSPC!
