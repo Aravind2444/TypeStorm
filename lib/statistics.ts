@@ -76,21 +76,21 @@ export function formatTime(seconds: number): string {
 }
 
 /**
- * Get next student name (student1, student2, etc.)
+ * Get next student name (person 1, person 2, etc.)
  */
 export function getNextStudentName(): string {
-  if (typeof window === 'undefined') return 'student1';
-  
+  if (typeof window === 'undefined') return 'person 1';
+
   const counterKey = 'typestorm_student_counter';
-  
+
   // Get current counter (starts at 0)
   const currentCounter = parseInt(localStorage.getItem(counterKey) || '0', 10);
   const nextCounter = currentCounter + 1;
-  
+
   // Save incremented counter
   localStorage.setItem(counterKey, nextCounter.toString());
-  
-  return `student${nextCounter}`;
+
+  return `person ${nextCounter}`;
 }
 
 /**

@@ -21,22 +21,22 @@ export function Header({ onFullscreen, isFullscreen }: HeaderProps) {
     setMounted(true);
   }, []);
 
-  // Choose the appropriate HITS logo based on theme
-  const hitsLogo = mounted && theme === 'dark'
-    ? '/HITS logo-black background.png'
-    : '/HITS logo-white background.png';
+  // Choose the appropriate TypeStorm logo based on theme
+  const typestormLogo = mounted && theme === 'dark'
+    ? '/Typestorm-logo-Blackbg.png'
+    : '/Typestorm-logo-Whitebg.png';
 
   return (
     <header className="sticky top-0 z-50 w-full glass">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-        {/* Left: HITS Logo */}
+        {/* Left: TypeStorm Logo */}
         <Link href="/" className="flex items-center gap-4 transition-opacity hover:opacity-80">
           <Image
-            src={hitsLogo}
-            alt="HITS Logo"
+            src={typestormLogo}
+            alt="TypeStorm Logo"
             width={180}
             height={60}
-            className="h-16 w-auto"
+            className="h-12 w-auto"
             priority
           />
         </Link>

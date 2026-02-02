@@ -21,8 +21,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { TestSettings, Difficulty, TestMode } from '@/types';
-import { Trash2, Settings, Save, Lock, ArrowLeft } from 'lucide-react';
-import { DEFAULT_ADMIN_PASSWORD } from '@/lib/constants';
+import { Trash2, Settings, Save, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 interface AdminPanelProps {
@@ -33,21 +32,8 @@ interface AdminPanelProps {
 
 export function AdminPanel({ settings, onSettingsChange, onResetLeaderboard }: AdminPanelProps) {
   const router = useRouter();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState('');
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [tempSettings, setTempSettings] = useState(settings);
-
-  const handleLogin = () => {
-    // Simple password check (in production, use proper auth)
-    if (password === DEFAULT_ADMIN_PASSWORD) {
-      setIsAuthenticated(true);
-      setPassword('');
-    } else {
-      alert('Incorrect password!');
-      setPassword('');
-    }
-  };
 
   const handleSaveSettings = () => {
     onSettingsChange(tempSettings);
@@ -60,46 +46,6 @@ export function AdminPanel({ settings, onSettingsChange, onResetLeaderboard }: A
     alert('Leaderboard has been reset!');
   };
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5">
-        <Card className="w-full max-w-md p-8 bg-background/50 backdrop-blur-md border-white/10">
-          <div className="text-center space-y-6">
-            <div className="flex justify-center">
-              <div className="p-4 rounded-full bg-primary/10">
-                <Lock className="w-12 h-12 text-primary" />
-              </div>
-            </div>
-            
-            <div>
-              <h1 className="text-3xl font-bold mb-2">Admin Panel</h1>
-              <p className="text-muted-foreground">Enter password to access settings</p>
-            </div>
-            
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-                  className="mt-2"
-                  placeholder="Enter admin password"
-                />
-              </div>
-              
-              <Button onClick={handleLogin} className="w-full" size="lg">
-                Login
-              </Button>
-            </div>
-          </div>
-        </Card>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-8">
       <div className="max-w-4xl mx-auto space-y-6">
@@ -111,21 +57,16 @@ export function AdminPanel({ settings, onSettingsChange, onResetLeaderboard }: A
             </h1>
             <p className="text-muted-foreground mt-1">Configure TypeStorm test settings</p>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => router.push('/')}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Test
-            </Button>
-            <Button variant="ghost" onClick={() => setIsAuthenticated(false)}>
-              Logout
-            </Button>
-          </div>
+          <Button variant="outline" onClick={() => router.push('/')}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Test
+          </Button>
         </div>
 
         {/* Test Settings */}
         <Card className="p-6 bg-background/50 backdrop-blur-md border-white/10">
           <h2 className="text-xl font-semibold mb-6">Test Configuration</h2>
-          
+
           <div className="space-y-6">
             {/* Test Mode */}
             <div className="space-y-2">
@@ -145,7 +86,7 @@ export function AdminPanel({ settings, onSettingsChange, onResetLeaderboard }: A
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
-                {tempSettings.mode === 'time' 
+                {tempSettings.mode === 'time'
                   ? 'Test runs for a specific duration'
                   : 'Test completes after typing a specific number of words'}
               </p>
@@ -227,7 +168,7 @@ export function AdminPanel({ settings, onSettingsChange, onResetLeaderboard }: A
           <p className="text-muted-foreground mb-6">
             Reset the leaderboard and student counter when a new class arrives
           </p>
-          
+
           <Button
             onClick={() => setShowResetDialog(true)}
             variant="destructive"
